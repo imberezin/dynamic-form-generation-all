@@ -1,70 +1,187 @@
-# Getting Started with Create React App
+# Dynamic Form Generation System
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A full-stack web application for dynamically generating forms from JSON schemas, with validation, submission handling, and submission history display.
 
-## Available Scripts
+## Overview
 
-In the project directory, you can run:
+This application consists of a React frontend and a Node.js backend with MySQL database. It allows users to:
 
-### `npm start`
+- Create and upload form schemas via JSON or file upload
+- Generate forms dynamically based on the schema
+- Validate form inputs according to schema rules
+- Submit form data
+- View submission history
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Project Structure
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```
+src/
+├── components/
+│   ├── DynamicForm.js      # Main form component
+│   ├── SchemaUploader.js   # Schema upload component
+│   ├── SelectFormView.js   # Select field renderer
+│   ├── SubmissionsView.js  # Previous submissions display
+│   └── TextFieldForm.js    # Text input field renderer
+├── hooks/
+│   └── useFetch.js         # Custom fetch hook
+├── services/
+│   └── api.js              # API service layer
+├── utils/
+│   └── validation.js       # Form validation utilities
+├── App.js                  # Main application
+└── index.js                # Application entry point
+```
 
-### `npm test`
+## Features
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Dynamic Form Generation
 
-### `npm run build`
+- Forms are generated based on JSON schemas that define fields, types, and validation rules
+- Supports multiple field types: text, email, password, date, number, select
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Schema Management
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- Upload schemas via JSON text or file upload
+- Switch between schemas easily
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Validation
 
-### `npm run eject`
+- Client-side validation using Yup
+- Validation rules are derived from the schema
+- Real-time field validation on blur
+- Form-level validation on submission
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Form Submission
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- Submit validated form data to the server
+- View submission status and errors
+- Reset form after submission
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Submission History
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- View all previous form submissions
+- Display formatted submission data
 
-## Learn More
+## Technical Implementation
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### API Service Layer
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+The application uses a dedicated API service layer that:
 
-### Code Splitting
+- Centralizes all API calls
+- Provides consistent error handling
+- Separates concerns by service type (schema, submission)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```javascript
+// Example API usage
+import { schemaService, submissionService } from "../services/api";
 
-### Analyzing the Bundle Size
+// Get active schema
+const schema = await schemaService.getActiveSchema();
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+// Submit form data
+await submissionService.createSubmission(formTitle, formData);
+```
 
-### Making a Progressive Web App
+### Custom useFetch Hook
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+A custom `useFetch` hook is used to:
 
-### Advanced Configuration
+- Handle API requests
+- Manage loading states
+- Handle errors
+- Provide a clean interface for components
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+```javascript
+// Example useFetch usage
+const { formData, loading, error, setOptions } = useFetch({
+  service: "schema",
+  endpoint: "getActive",
+});
+```
 
-### Deployment
+### Form Validation
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+Validation is managed through a utility that:
 
-### `npm run build` fails to minify
+- Generates Yup validation schemas from form definitions
+- Validates entire forms or single fields
+- Provides consistent error messages
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```javascript
+// Example validation
+const schema = generateValidationSchema(fields);
+const result = await validateForm(schema, formValues);
+```
+
+## Installation and Setup
+
+### Prerequisites
+
+- Node.js (v14+)
+- MySQL database
+
+### Backend Setup
+
+1. Clone the repository
+
+```
+git clone <repository-url>
+cd dynamic-form-system
+```
+
+2. Install dependencies
+
+```
+cd server
+npm install
+```
+
+3. Set up environment variables
+   Create a `.env` file with your database credentials and server configuration.
+
+4. Start the server
+
+```
+npm start
+```
+
+### Frontend Setup
+
+1. Install dependencies
+
+```
+cd client
+npm install
+```
+
+2. Start the development server
+
+```
+npm start
+```
+
+3. Access the application at http://localhost:3000
+
+## API Endpoints
+
+### Schemas
+
+- `GET /api/schemas/active` - Get the active form schema
+- `POST /api/schemas` - Create a new form schema
+- `POST /api/upload/schema` - Upload a schema file
+
+### Submissions
+
+- `GET /api/submissions` - Get all form submissions
+- `POST /api/submissions` - Create a new form submission
+- `GET /api/submissions/:id` - Get a specific submission
+
+## Future Enhancements
+
+- User authentication
+- Schema versioning
+- More field types (file uploads, rich text, etc.)
+- Advanced validation rules
+- Form analytics
+- Export of submissions to CSV/Excel
