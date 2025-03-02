@@ -1,4 +1,18 @@
-import React, { useState } from "react";
+/**
+ * SchemaUploader.js
+ *
+ * This component provides a UI for uploading form schemas either as JSON text
+ * or as a file upload. It uses the useReducer hook with a separate reducer file.
+ *
+ * Features:
+ * - Dialog with tab navigation between JSON paste and file upload
+ * - JSON validation before submission
+ * - File type validation
+ * - Loading indicators during submission
+ * - Success/error notifications
+ */
+
+import React, { useReducer } from "react";
 import {
   Box,
   Button,
@@ -20,74 +34,83 @@ import AddIcon from "@mui/icons-material/Add";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import { schemaService } from "../services/Api";
 
+// Import reducer, initial state, and action creators
+import schemaReducer, {
+  initialState,
+  schemaActions,
+} from "../reducers/schemaReducer";
+
 function SchemaUploader({ onSchemaUpdated }) {
-  const [open, setOpen] = useState(false);
-  const [tabValue, setTabValue] = useState(0);
-  const [schemaText, setSchemaText] = useState("");
-  const [schemaFile, setSchemaFile] = useState(null);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [state, dispatch] = useReducer(schemaReducer, initialState);
+  const { open, tabValue, schemaText, schemaFile, error, success, loading } =
+    state;
 
   const handleOpen = () => {
-    setOpen(true);
-    setTabValue(0);
-    setSchemaText("");
-    setSchemaFile(null);
-    setError(null);
+    // Use action creator to dispatch OPEN_DIALOG action
+    dispatch(schemaActions.openDialog());
   };
 
   const handleClose = () => {
-    setOpen(false);
+    // Use action creator to dispatch CLOSE_DIALOG action
+    dispatch(schemaActions.closeDialog());
   };
 
   const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
-    setError(null);
+    // Use action creator to dispatch CHANGE_TAB action
+    dispatch(schemaActions.changeTab(newValue));
   };
 
   const handleTextChange = (e) => {
-    setSchemaText(e.target.value);
-    setError(null);
+    // Use action creator to dispatch UPDATE_SCHEMA_TEXT action
+    dispatch(schemaActions.updateSchemaText(e.target.value));
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       if (file.type !== "application/json") {
-        setError("Only JSON files are allowed");
-        setSchemaFile(null);
+        // Use action creator to dispatch SET_ERROR action
+        dispatch(schemaActions.setError("Only JSON files are allowed"));
+        // Use action creator to dispatch SET_SCHEMA_FILE action with null
+        dispatch(schemaActions.setSchemaFile(null));
       } else {
-        setSchemaFile(file);
-        setError(null);
+        // Use action creator to dispatch SET_SCHEMA_FILE action with file
+        dispatch(schemaActions.setSchemaFile(file));
       }
     }
   };
 
   const handleJsonSubmit = async () => {
     try {
-      setLoading(true);
+      // Use action creator to dispatch SET_LOADING action
+      dispatch(schemaActions.setLoading(true));
+
       // Validate JSON format
       let schemaJson;
       try {
         schemaJson = JSON.parse(schemaText);
       } catch (err) {
-        setError("Invalid JSON format");
-        setLoading(false);
+        // Use action creator to dispatch SET_ERROR action
+        dispatch(schemaActions.setError("Invalid JSON format"));
+        dispatch(schemaActions.setLoading(false));
         return;
       }
 
       // Validate schema structure
       if (!schemaJson.title || !Array.isArray(schemaJson.fields)) {
-        setError("Schema must include a title and fields array");
-        setLoading(false);
+        // Use action creator to dispatch SET_ERROR action
+        dispatch(
+          schemaActions.setError("Schema must include a title and fields array")
+        );
+        dispatch(schemaActions.setLoading(false));
         return;
       }
 
       // Submit the schema using our service
       await schemaService.uploadSchema(schemaJson);
 
-      setSuccess("Schema uploaded successfully");
+      // Use action creator to dispatch SET_SUCCESS action
+      dispatch(schemaActions.setSuccess("Schema uploaded successfully"));
       handleClose();
 
       // Notify the parent component to refresh the schema
@@ -95,27 +118,34 @@ function SchemaUploader({ onSchemaUpdated }) {
       onSchemaUpdated(timestamp);
     } catch (err) {
       console.error("Error uploading schema:", err);
-      setError(err.message || "Failed to upload schema");
+      // Use action creator to dispatch SET_ERROR action
+      dispatch(
+        schemaActions.setError(err.message || "Failed to upload schema")
+      );
     } finally {
-      setLoading(false);
+      // Use action creator to dispatch SET_LOADING action
+      dispatch(schemaActions.setLoading(false));
     }
   };
 
   const handleFileSubmit = async () => {
     if (!schemaFile) {
-      setError("Please select a file");
+      // Use action creator to dispatch SET_ERROR action
+      dispatch(schemaActions.setError("Please select a file"));
       return;
     }
 
     try {
-      setLoading(true);
+      // Use action creator to dispatch SET_LOADING action
+      dispatch(schemaActions.setLoading(true));
       const formData = new FormData();
       formData.append("schemaFile", schemaFile);
 
       // Submit file using our service
       await schemaService.uploadSchemaFile(formData);
 
-      setSuccess("Schema file uploaded successfully");
+      // Use action creator to dispatch SET_SUCCESS action
+      dispatch(schemaActions.setSuccess("Schema file uploaded successfully"));
       handleClose();
 
       // Notify the parent component to refresh the schema
@@ -123,9 +153,13 @@ function SchemaUploader({ onSchemaUpdated }) {
       onSchemaUpdated(timestamp);
     } catch (err) {
       console.error("Error uploading schema file:", err);
-      setError(err.message || "Failed to upload schema file");
+      // Use action creator to dispatch SET_ERROR action
+      dispatch(
+        schemaActions.setError(err.message || "Failed to upload schema file")
+      );
     } finally {
-      setLoading(false);
+      // Use action creator to dispatch SET_LOADING action
+      dispatch(schemaActions.setLoading(false));
     }
   };
 
@@ -255,11 +289,11 @@ function SchemaUploader({ onSchemaUpdated }) {
       <Snackbar
         open={!!success}
         autoHideDuration={6000}
-        onClose={() => setSuccess(null)}
+        onClose={() => dispatch(schemaActions.setSuccess(null))}
         anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
       >
         <Alert
-          onClose={() => setSuccess(null)}
+          onClose={() => dispatch(schemaActions.setSuccess(null))}
           severity="success"
           sx={{ width: "100%" }}
         >

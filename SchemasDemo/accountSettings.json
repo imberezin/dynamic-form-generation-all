@@ -1,0 +1,13 @@
+{
+  "title": "Account Settings",
+  "fields": [
+    { "name": "currentEmail", "label": "Current Email", "type": "email", "required": true },
+    { "name": "newEmail", "label": "New Email", "type": "email", "required": false },
+    { "name": "currentPassword", "label": "Current Password", "type": "password", "required": true, "minLength": 8 },
+    { "name": "newPassword", "label": "New Password", "type": "password", "required": false, "minLength": 8 },
+    { "name": "confirmNewPassword", "label": "Confirm New Password", "type": "password", "required": false, "minLength": 8 },
+    { "name": "language", "label": "Preferred Language", "type": "select", "options": ["English", "Spanish", "French", "German", "Chinese", "Japanese"], "required": true },
+    { "name": "timezone", "label": "Timezone", "type": "select", "options": ["UTC-12:00", "UTC-08:00 (PST)", "UTC-05:00 (EST)", "UTC+00:00 (GMT)", "UTC+01:00 (CET)", "UTC+08:00 (CST)", "UTC+09:00 (JST)"], "required": true },
+    { "name": "notificationPreference", "label": "Notification Preference", "type": "select", "options": ["Email", "SMS", "Push Notifications", "None"], "required": true }
+  ]
+}

@@ -1,4 +1,18 @@
-import React, { useState, useEffect } from "react";
+/**
+ * DynamicForm.js
+ *
+ * This component renders a dynamic form based on a provided schema.
+ * It uses the useReducer hook with a separate reducer file for state management.
+ *
+ * Features:
+ * - Dynamically generates form fields based on schema
+ * - Validates fields on blur and form submission
+ * - Handles form submission to an API
+ * - Displays success/error messages
+ * - Provides form reset functionality
+ */
+
+import React, { useReducer, useEffect } from "react";
 import {
   Box,
   Button,
@@ -19,8 +33,14 @@ import {
   generateValidationSchema,
   validateForm,
   validateField,
-} from "../utils/Validation";
+} from "../utils/validation";
 import { submissionService } from "../services/Api";
+
+// Import reducer, initial state, and action creators
+import formReducer, {
+  initialState,
+  formActions,
+} from "../reducers/formReducer";
 
 function DynamicForm({ schema }) {
   const initialOptions = {
@@ -29,13 +49,16 @@ function DynamicForm({ schema }) {
     params: {},
   };
 
-  const [formValues, setFormValues] = useState({});
-  const [formErrors, setFormErrors] = useState({});
-  const [touched, setTouched] = useState({});
-  const [validationSchema, setValidationSchema] = useState(null);
-  const [submissionLoading, setSubmissionLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState(null);
-  const [errorMessage, setErrorMessage] = useState(null);
+  const [state, dispatch] = useReducer(formReducer, initialState);
+  const {
+    formValues,
+    formErrors,
+    touched,
+    validationSchema,
+    submissionLoading,
+    successMessage,
+    errorMessage,
+  } = state;
 
   const {
     formData: submissions = [],
@@ -47,7 +70,7 @@ function DynamicForm({ schema }) {
   useEffect(() => {
     if (schema?.fields) {
       // Use our validation utility to create the schema
-      setValidationSchema(generateValidationSchema(schema.fields));
+      const newValidationSchema = generateValidationSchema(schema.fields);
 
       // Initialize form values
       const initialValues = {};
@@ -55,36 +78,25 @@ function DynamicForm({ schema }) {
         initialValues[field.name] = "";
       });
 
-      setFormValues(initialValues);
-      setFormErrors({});
-      setTouched({});
+      // Use action creator to dispatch INIT_FORM action
+      dispatch(formActions.initForm(initialValues, newValidationSchema));
     }
   }, [schema]);
 
   // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormValues((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
 
-    // Clear error for this field if it was previously set
-    if (formErrors[name]) {
-      setFormErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
-    }
+    // Use action creator to dispatch UPDATE_FIELD action
+    dispatch(formActions.updateField(name, value, Boolean(formErrors[name])));
   };
 
   // Handle field blur
   const handleBlur = async (e) => {
     const { name } = e.target;
-    setTouched((prev) => ({
-      ...prev,
-      [name]: true,
-    }));
+
+    // Use action creator to dispatch SET_TOUCHED action
+    dispatch(formActions.setTouched(name));
 
     // Use validation utility to validate the field
     if (validationSchema) {
@@ -93,17 +105,11 @@ function DynamicForm({ schema }) {
         name,
         formValues[name]
       );
-      if (!result.isValid) {
-        setFormErrors((prev) => ({
-          ...prev,
-          [name]: result.error,
-        }));
-      } else {
-        setFormErrors((prev) => ({
-          ...prev,
-          [name]: "",
-        }));
-      }
+
+      // Use action creator to dispatch SET_FIELD_ERROR action
+      dispatch(
+        formActions.setFieldError(name, result.isValid ? "" : result.error)
+      );
     }
   };
 
@@ -114,14 +120,17 @@ function DynamicForm({ schema }) {
     const result = await validateForm(validationSchema, formValues);
 
     if (!result.isValid) {
-      setFormErrors(result.errors);
+      // Use action creator to dispatch SET_FORM_ERRORS action
+      dispatch(formActions.setFormErrors(result.errors));
 
       // Mark all fields as touched
       const newTouched = {};
       schema.fields.forEach((field) => {
         newTouched[field.name] = true;
       });
-      setTouched(newTouched);
+
+      // Use action creator to dispatch SET_ALL_TOUCHED action
+      dispatch(formActions.setAllTouched(newTouched));
 
       return false;
     }
@@ -138,13 +147,15 @@ function DynamicForm({ schema }) {
       return;
     }
 
-    setSubmissionLoading(true);
-    setErrorMessage(null);
+    // Use action creators to update state for form submission
+    dispatch(formActions.setSubmissionLoading(true));
+    dispatch(formActions.setErrorMessage(null));
 
     try {
       await submissionService.createSubmission(schema.title, formValues);
 
-      setSuccessMessage("Form submitted successfully!");
+      // Use action creator to set success message
+      dispatch(formActions.setSuccessMessage("Form submitted successfully!"));
 
       // Refresh submissions with a timestamp to bust cache
       const timestamp = new Date().toLocaleString().replace(",", "");
@@ -159,14 +170,19 @@ function DynamicForm({ schema }) {
       schema.fields.forEach((field) => {
         initialValues[field.name] = "";
       });
-      setFormValues(initialValues);
-      setFormErrors({});
-      setTouched({});
+
+      // Use action creator to reset form
+      dispatch(formActions.resetForm(initialValues));
     } catch (error) {
-      setErrorMessage("Error submitting form. Please try again.");
+      // Use action creator to set error message
+      dispatch(
+        formActions.setErrorMessage("Error submitting form. Please try again.")
+      );
+
       console.error("Form submission error:", error);
     } finally {
-      setSubmissionLoading(false);
+      // Use action creator to update loading state
+      dispatch(formActions.setSubmissionLoading(false));
     }
   };
 
@@ -176,9 +192,9 @@ function DynamicForm({ schema }) {
     schema.fields.forEach((field) => {
       initialValues[field.name] = "";
     });
-    setFormValues(initialValues);
-    setFormErrors({});
-    setTouched({});
+
+    // Use action creator to reset form
+    dispatch(formActions.resetForm(initialValues));
   };
 
   return (
@@ -252,11 +268,11 @@ function DynamicForm({ schema }) {
       <Snackbar
         open={!!successMessage}
         autoHideDuration={6000}
-        onClose={() => setSuccessMessage(null)}
+        onClose={() => dispatch(formActions.setSuccessMessage(null))}
         anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
       >
         <Alert
-          onClose={() => setSuccessMessage(null)}
+          onClose={() => dispatch(formActions.setSuccessMessage(null))}
           severity="success"
           sx={{ width: "100%" }}
         >
@@ -267,11 +283,11 @@ function DynamicForm({ schema }) {
       <Snackbar
         open={!!errorMessage}
         autoHideDuration={6000}
-        onClose={() => setErrorMessage(null)}
+        onClose={() => dispatch(formActions.setErrorMessage(null))}
         anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
       >
         <Alert
-          onClose={() => setErrorMessage(null)}
+          onClose={() => dispatch(formActions.setErrorMessage(null))}
           severity="error"
           sx={{ width: "100%" }}
         >
