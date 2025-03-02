@@ -2,6 +2,8 @@ const express = require("express");
 const dotenv = require("dotenv");
 const submissionRoutes = require("./routes/submissionRoutes");
 const schemaRoutes = require("./routes/schemaRoutes");
+const uploadRoutes = require("./routes/uploadRoutes");
+
 const db = require("./config/database");
 const fs = require("fs");
 const path = require("path");
@@ -62,6 +64,7 @@ app.use(express.json());
 // Routes
 app.use("/api/submissions", submissionRoutes);
 app.use("/api/schemas", schemaRoutes);
+app.use("/api/upload", uploadRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
