@@ -1,4 +1,5 @@
-import React, { memo } from "react";
+import React, { memo, useContext } from "react";
+import { FromContext } from "../App";
 
 import {
   Box,
@@ -9,7 +10,9 @@ import {
   Typography,
 } from "@mui/material";
 
-function SubmissionsView({ submissions, loading }) {
+function SubmissionsView() {
+  const { submissions, submissionsLoading } = useContext(FromContext);
+
   const formatDate = (dateString) => {
     try {
       const date = new Date(dateString);
@@ -27,7 +30,7 @@ function SubmissionsView({ submissions, loading }) {
             Previous Submissions
           </Typography>
 
-          {loading ? (
+          {submissionsLoading ? (
             <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
               <CircularProgress size={30} />
             </Box>

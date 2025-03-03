@@ -1,11 +1,39 @@
 {
   "title": "User Registration",
   "fields": [
-    { "name": "username", "label": "Username", "type": "text", "required": true, "minLength": 3, "maxLength": 20 },
-    { "name": "email", "label": "Email Address", "type": "email", "required": true },
-    { "name": "password", "label": "Password", "type": "password", "required": true, "minLength": 8 },
-    { "name": "confirmPassword", "label": "Confirm Password", "type": "password", "required": true, "minLength": 8 },
-    { "name": "birthdate", "label": "Date of Birth", "type": "date", "required": true },
-    { "name": "gender", "label": "Gender", "type": "select", "options": ["Male", "Female", "Non-binary", "Prefer not to say"], "required": true }
+    {
+      "name": "username",
+      "label": "Username",
+      "type": "text",
+      "required": true,
+      "minLength": 3,
+      "maxLength": 20
+    },
+    {
+      "name": "email",
+      "label": "Email Address",
+      "type": "email",
+      "required": true
+    },
+    {
+      "name": "password",
+      "label": "Password",
+      "type": "password",
+      "required": true,
+      "minLength": 4
+    },
+    {
+      "name": "birthdate",
+      "label": "Date of Birth",
+      "type": "date",
+      "required": true
+    },
+    {
+      "name": "gender",
+      "label": "Gender",
+      "type": "select",
+      "options": ["Male", "Female", "Prefer not to say"],
+      "required": true
+    }
   ]
 }

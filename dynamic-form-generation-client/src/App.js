@@ -23,6 +23,7 @@ import useFetch from "./hooks/useFetch";
 import appReducer, { initialState, appActions } from "./reducers/appReducer";
 
 const theme = createTheme();
+export const FromContext = React.createContext();
 
 function App() {
   const [state, dispatch] = useReducer(appReducer, initialState);
@@ -44,33 +45,66 @@ function App() {
     setOptions(newOptions);
   }
 
+  const initialOptions = {
+    service: "submission",
+    endpoint: "getAll",
+    params: {},
+  };
+
+  const {
+    formData: submissions = [],
+    submissionsLoading,
+    setOptions: submissionsSetOptions,
+  } = useFetch(initialOptions);
+
+  const updateSubmissionsList = () => {
+    console.log("Updating submissions list...");
+    const timestamp = new Date().toLocaleString().replace(",", "");
+    submissionsSetOptions({
+      service: "submission",
+      endpoint: "getAll",
+      params: { timestamp },
+    });
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Container maxWidth="lg">
-        <Box sx={{ my: 4 }}>
-          <Typography variant="h3" component="h1" gutterBottom align="center">
-            Dynamic Form System
-          </Typography>
-
-          {loading ? (
-            <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
-              <CircularProgress />
-            </Box>
-          ) : error ? (
-            <Box sx={{ textAlign: "center", my: 4 }}>
-              <Typography color="error" gutterBottom>
-                {error}
-              </Typography>
-            </Box>
-          ) : formData ? (
-            <DynamicForm schema={formData} />
-          ) : (
-            <Typography align="center">
-              No form schema available. Please upload a schema.
+        <FromContext.Provider
+          value={{
+            schema: formData,
+            loading,
+            error,
+            submissions,
+            submissionsLoading,
+            updateSubmissionsList,
+          }}
+        >
+          <Box sx={{ my: 4 }}>
+            <Typography variant="h3" component="h1" gutterBottom align="center">
+              Dynamic Form System
             </Typography>
-          )}
-        </Box>
+
+            {loading ? (
+              <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
+                <CircularProgress />
+              </Box>
+            ) : error ? (
+              <Box sx={{ textAlign: "center", my: 4 }}>
+                <Typography color="error" gutterBottom>
+                  {error}
+                </Typography>
+              </Box>
+            ) : formData ? (
+              <DynamicForm />
+            ) : (
+              <Typography align="center">
+                No form schema available. Please upload a schema.
+              </Typography>
+            )}
+          </Box>
+        </FromContext.Provider>
       </Container>
 
       <SchemaUploader onSchemaUpdated={handleSchemaUpdate} />
