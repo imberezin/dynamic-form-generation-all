@@ -1,0 +1,25 @@
+{
+  "title": "Account Settings",
+  "fields": [
+    {
+      "name": "Email",
+      "label": "Email",
+      "type": "email",
+      "required": false
+    },
+    {
+      "name": "Password",
+      "label": "Password",
+      "type": "password",
+      "required": false,
+      "minLength": 4
+    },
+    {
+      "name": "confirmNewPassword",
+      "label": "Confirm New Password",
+      "type": "confirmNewPassword",
+      "required": false,
+      "minLength": 4
+    }
+  ]
+}
