@@ -1,3 +1,5 @@
+import React, { memo } from "react";
+
 import {
   Box,
   Card,
@@ -57,4 +59,32 @@ function SubmissionsView({ submissions, loading }) {
   );
 }
 
-export default SubmissionsView;
+function arePropsEqual(prevProps, nextProps) {
+  // Check if loading state changed
+  if (prevProps.loading !== nextProps.loading) return false;
+
+  // Check if submissions array reference changed
+  if (prevProps.submissions !== nextProps.submissions) {
+    // If lengths differ, definitely changed
+    if (
+      !prevProps.submissions ||
+      !nextProps.submissions ||
+      prevProps.submissions.length !== nextProps.submissions.length
+    ) {
+      return false;
+    }
+
+    // Check if submissions were added or ids changed
+    for (let i = 0; i < prevProps.submissions.length; i++) {
+      if (prevProps.submissions[i].id !== nextProps.submissions[i].id) {
+        return false;
+      }
+    }
+  }
+
+  // If we got here, no relevant props changed
+  return true;
+}
+
+// Export memoized component with custom comparison function
+export default memo(SubmissionsView, arePropsEqual);
