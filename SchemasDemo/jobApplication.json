@@ -1,0 +1,14 @@
+{
+  "title": "Job Application",
+  "fields": [
+    { "name": "firstName", "label": "First Name", "type": "text", "required": true },
+    { "name": "lastName", "label": "Last Name", "type": "text", "required": true },
+    { "name": "email", "label": "Email Address", "type": "email", "required": true },
+    { "name": "phone", "label": "Phone Number", "type": "text", "required": true },
+    { "name": "position", "label": "Position Applied For", "type": "select", "options": ["Software Developer", "UX Designer", "Product Manager", "QA Engineer", "DevOps Engineer"], "required": true },
+    { "name": "experience", "label": "Years of Experience", "type": "number", "required": true, "min": 0, "max": 50 },
+    { "name": "startDate", "label": "Available Start Date", "type": "date", "required": true },
+    { "name": "salary", "label": "Expected Salary (USD)", "type": "number", "required": true, "min": 0 },
+    { "name": "education", "label": "Highest Education", "type": "select", "options": ["High School", "Associate's Degree", "Bachelor's Degree", "Master's Degree", "PhD"], "required": true }
+  ]
+}

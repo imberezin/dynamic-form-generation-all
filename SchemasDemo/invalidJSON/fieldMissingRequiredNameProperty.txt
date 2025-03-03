@@ -1,0 +1,7 @@
+{
+  "title": "Missing Field Name",
+  "fields": [
+    { "label": "Username", "type": "text", "required": true },
+    { "name": "email", "label": "Email", "type": "email", "required": true }
+  ]
+}
