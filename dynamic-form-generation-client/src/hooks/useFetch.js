@@ -17,7 +17,7 @@ export default function useFetch(options) {
 
   // Create a function to update API options
   const setOptions = useCallback((newOptions) => {
-    console.log("Setting new options:", newOptions);
+    // console.log("Setting new options:", newOptions);
     setApiOptions(newOptions);
   }, []);
 
@@ -99,7 +99,7 @@ export default function useFetch(options) {
             }
         }
 
-        console.log("Data fetched:", data);
+        // console.log("Data fetched:", data);
         setFormData(data);
       } catch (err) {
         console.error("Error fetching data:", err);

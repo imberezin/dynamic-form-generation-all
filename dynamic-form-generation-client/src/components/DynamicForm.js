@@ -12,7 +12,7 @@
  * - Provides form reset functionality
  */
 
-import React, { useReducer, useEffect, useContext } from "react";
+import React, { useReducer, useEffect } from "react";
 import {
   Box,
   Button,
@@ -40,10 +40,12 @@ import formReducer, {
   initialState,
   formActions,
 } from "../reducers/formReducer";
-import { FromContext } from "../App";
+import { useFromContext } from "../hooks/FromProvider";
 
 function DynamicForm() {
-  const { schema, updateSubmissionsList } = useContext(FromContext);
+  const { formData: schema, updateSubmissionsList } = useFromContext();
+
+  // console.log("schema", schema);
 
   const [state, dispatch] = useReducer(formReducer, initialState);
   const {

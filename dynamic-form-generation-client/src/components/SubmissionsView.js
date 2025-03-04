@@ -1,5 +1,5 @@
-import React, { memo, useContext } from "react";
-import { FromContext } from "../App";
+import React, { memo } from "react";
+import { useFromContext } from "../hooks/FromProvider";
 
 import {
   Box,
@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 
 function SubmissionsView() {
-  const { submissions, submissionsLoading } = useContext(FromContext);
+  const { submissions, submissionsLoading } = useFromContext();
 
   const formatDate = (dateString) => {
     try {
