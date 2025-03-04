@@ -4,7 +4,7 @@ import useFetch from "./useFetch";
 import appReducer, { initialState, appActions } from "../reducers/appReducer";
 import React, { createContext, useContext } from "react";
 
-export const MyContext = createContext();
+export const FromContext = createContext();
 
 export function FromProvider({ children }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
@@ -59,8 +59,8 @@ export function FromProvider({ children }) {
     updateSubmissionsList,
   };
 
-  return <MyContext.Provider value={value}>{children}</MyContext.Provider>;
+  return <FromContext.Provider value={value}>{children}</FromContext.Provider>;
 }
 export function useFromContext() {
-  return useContext(MyContext);
+  return useContext(FromContext);
 }
