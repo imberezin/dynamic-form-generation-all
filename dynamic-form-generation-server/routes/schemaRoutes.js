@@ -11,4 +11,7 @@ router.post("/", schemaController.createSchema);
 // Get all form schemas
 router.get("/", schemaController.getAllSchemas);
 
+// Set a schema as active by ID
+router.put("/:id/activate", schemaController.setActiveSchema);
+
 module.exports = router;

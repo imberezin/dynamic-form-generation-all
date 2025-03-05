@@ -1,5 +1,3 @@
-// require("dotenv").config();
-
 const mysql = require("mysql");
 
 const config = {
@@ -14,8 +12,3 @@ const config = {
 };
 
 module.exports = config;
-
-// module.exports = {
-//     jwtSecret: 'your_secret_key_here', // Replace with a strong, random key
-//     jwtExpiration: '1h' // Token expiration time (e.g., 1 hour)
-// };
