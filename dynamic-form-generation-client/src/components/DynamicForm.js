@@ -27,7 +27,6 @@ import {
 import Alert from "@mui/material/Alert";
 import SelectFormView from "./SelectFormView";
 import TextFieldForm from "./TextFieldForm";
-import useFetch from "../hooks/useFetch";
 import SubmissionsView from "./SubmissionsView";
 import {
   generateValidationSchema,
@@ -41,13 +40,12 @@ import formReducer, {
   initialState,
   formActions,
 } from "../reducers/formReducer";
+import { useFromContext } from "../hooks/FromProvider";
 
-function DynamicForm({ schema }) {
-  const initialOptions = {
-    service: "submission",
-    endpoint: "getAll",
-    params: {},
-  };
+function DynamicForm() {
+  const { formData: schema, updateSubmissionsList } = useFromContext();
+
+  // console.log("schema", schema);
 
   const [state, dispatch] = useReducer(formReducer, initialState);
   const {
@@ -59,12 +57,6 @@ function DynamicForm({ schema }) {
     successMessage,
     errorMessage,
   } = state;
-
-  const {
-    formData: submissions = [],
-    loading,
-    setOptions,
-  } = useFetch(initialOptions);
 
   // Generate validation schema based on the form schema
   useEffect(() => {
@@ -158,13 +150,7 @@ function DynamicForm({ schema }) {
       // Use action creator to set success message
       dispatch(formActions.setSuccessMessage("Form submitted successfully!"));
 
-      // Refresh submissions with a timestamp to bust cache
-      const timestamp = new Date().toLocaleString().replace(",", "");
-      setOptions({
-        service: "submission",
-        endpoint: "getAll",
-        params: { timestamp },
-      });
+      updateSubmissionsList();
 
       // Reset form
       const initialValues = {};
@@ -262,7 +248,7 @@ function DynamicForm({ schema }) {
         </Grid>
 
         {/* Submissions Section */}
-        <SubmissionsView submissions={submissions} loading={loading} />
+        <SubmissionsView />
       </Grid>
 
       {/* Success/Error messages */}

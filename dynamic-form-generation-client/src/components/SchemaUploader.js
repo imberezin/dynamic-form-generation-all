@@ -39,8 +39,11 @@ import schemaReducer, {
   initialState,
   schemaActions,
 } from "../reducers/schemaReducer";
+import { useFromContext } from "../hooks/FromProvider";
 
-function SchemaUploader({ onSchemaUpdated }) {
+function SchemaUploader() {
+  const { handleSchemaUpdate } = useFromContext();
+  // console.log("handleSchemaUpdate", handleSchemaUpdate);
   const [state, dispatch] = useReducer(schemaReducer, initialState);
   const { open, tabValue, schemaText, schemaFile, error, success, loading } =
     state;
@@ -115,7 +118,7 @@ function SchemaUploader({ onSchemaUpdated }) {
 
       // Notify the parent component to refresh the schema
       const timestamp = new Date().toLocaleString().replace(",", "");
-      onSchemaUpdated(timestamp);
+      handleSchemaUpdate(timestamp);
     } catch (err) {
       console.error("Error uploading schema:", err);
       // Use action creator to dispatch SET_ERROR action
@@ -150,7 +153,7 @@ function SchemaUploader({ onSchemaUpdated }) {
 
       // Notify the parent component to refresh the schema
       const timestamp = new Date().toLocaleString().replace(",", "");
-      onSchemaUpdated(timestamp);
+      handleSchemaUpdate(timestamp);
     } catch (err) {
       console.error("Error uploading schema file:", err);
       // Use action creator to dispatch SET_ERROR action

@@ -67,26 +67,36 @@ The application is built with a focus on clean architecture, maintainable code, 
 ## Project Structure
 
 ```
-src/
-├── components/
-│   ├── DynamicForm.js        # Main form component
-│   ├── SchemaUploader.js     # Schema upload component
-│   ├── SelectFormView.js     # Select field renderer
-│   ├── SubmissionsView.js    # Previous submissions display
-│   └── TextFieldForm.js      # Text input field renderer
-├── reducers/
-│   ├── formReducer.js        # Form state management
-│   ├── schemaReducer.js      # Schema uploader state management
-│   ├── appReducer.js         # App-level state management
-│   └── index.js              # Exports all reducers and actions
-├── hooks/
-│   └── useFetch.js           # Custom fetch hook
-├── services/
-│   └── Api.js                # API service layer
-├── utils/
-│   └── validation.js         # Form validation utilities
-├── App.js                    # Main application
-└── index.js                  # Application entry point
+
+Project Structure
+
+├── src/
+│   ├── components/
+│   │   ├── DynamicForm.js        (Component for dynamic form rendering)
+│   │   ├── MainView.js           (Main application view/layout)
+│   │   ├── SchemaUploader.js     (Component for uploading new schema)
+│   │   ├── SelectFormView.js     (Component for select field renderer)
+│   │   ├── SubmissionsView.js    (Component for previous submissions display)
+│   │   ├── TextFieldForm.js      (Component for input field renderer)
+│   ├── hooks/
+│   │   ├── FromProvider.js       (React Context Provider for application state and data)
+│   │   ├── useFetch.js           (Custom hook for fetching data)
+│   ├── reducers/
+│   │   ├── appReducer.js         (Reducer for App-level state management)
+│   │   ├── formReducer.js        (Reducer for Form state management)
+│   │   ├── schemaReducer.js      (Reducer for Schema uploader state management)
+│   ├── services/
+│   │   ├── Api.js                (Service for API interactions)
+│   ├── utils/
+│   │   └── validation.js         (Form validation utilities)
+│   ├── App.js                    (Main application component)
+│   ├── index.js                  (Entry point of the application)
+├── public/                       (Public assets)
+│   ├── index.html                (HTML template)
+├── package.json                  (Project dependencies and scripts)
+├── package-lock.json             (Dependency lock file)
+├── README.md                     (Project documentation)
+
 ```
 
 ## State Management Architecture
