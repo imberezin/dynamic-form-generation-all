@@ -4,6 +4,7 @@ const dbConfig = require("./config");
 
 const fs = require("fs");
 const path = require("path");
+const formConfig = require("./data/defaultSchema");
 
 var con = mysql.createConnection(dbConfig.database);
 
@@ -54,39 +55,7 @@ function initDb() {
 
       if (results[0].count === 0) {
         // Insert default schema directly
-        const defaultSchema = {
-          title: "User Registration",
-          fields: [
-            {
-              name: "username",
-              label: "Username",
-              type: "text",
-              required: true,
-              minLength: 2,
-            },
-            { name: "email", label: "Email", type: "email", required: true },
-            {
-              name: "password",
-              label: "Password",
-              type: "password",
-              required: true,
-              minLength: 6,
-            },
-            {
-              name: "birthdate",
-              label: "Birthdate",
-              type: "date",
-              required: true,
-            },
-            {
-              name: "gender",
-              label: "Gender",
-              type: "select",
-              options: ["Male", "Female", "Other"],
-              required: true,
-            },
-          ],
-        };
+        const defaultSchema = formConfig.defaultSchema;
 
         const insertQuery = `
           INSERT INTO form_schemas (title, fields, active)

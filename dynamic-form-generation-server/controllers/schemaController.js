@@ -115,3 +115,70 @@ exports.getAllSchemas = (req, res) => {
     }
   );
 };
+
+// Set a schema as active by ID
+exports.setActiveSchema = (req, res) => {
+  const schemaId = req.params.id;
+  
+  if (!schemaId) {
+    return res.status(400).json({ message: "Schema ID is required" });
+  }
+
+  // First, check if the schema exists
+  db.query("SELECT * FROM form_schemas WHERE id = ?", [schemaId], (err, results) => {
+    if (err) {
+      console.error("Error checking schema:", err);
+      return res.status(500).json({ message: "Error setting active schema" });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: "Schema not found" });
+    }
+
+    // Set all schemas to inactive first
+    db.query("UPDATE form_schemas SET active = false", (err) => {
+      if (err) {
+        console.error("Error updating schemas status:", err);
+        return res.status(500).json({ message: "Error setting active schema" });
+      }
+
+      // Then set the specified schema to active
+      db.query(
+        "UPDATE form_schemas SET active = true WHERE id = ?",
+        [schemaId],
+        (err, result) => {
+          if (err) {
+            console.error("Error setting active schema:", err);
+            return res.status(500).json({ message: "Error setting active schema" });
+          }
+
+          // Get the updated schema
+          db.query(
+            "SELECT * FROM form_schemas WHERE id = ?",
+            [schemaId],
+            (err, results) => {
+              if (err || results.length === 0) {
+                console.error("Error fetching updated schema:", err);
+                return res.status(200).json({ 
+                  message: "Schema set as active successfully" 
+                });
+              }
+
+              const schema = results[0];
+              try {
+                schema.fields = JSON.parse(schema.fields);
+              } catch (error) {
+                console.error("Error parsing fields JSON:", error);
+              }
+
+              res.status(200).json({
+                message: "Schema set as active successfully",
+                schema
+              });
+            }
+          );
+        }
+      );
+    });
+  });
+};
