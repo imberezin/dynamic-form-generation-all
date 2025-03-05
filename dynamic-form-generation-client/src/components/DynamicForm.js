@@ -95,7 +95,8 @@ function DynamicForm() {
       const result = await validateField(
         validationSchema,
         name,
-        formValues[name]
+        formValues[name],
+        formValues // Pass all form values as the fourth argument to support cross-field validation (confirm password)
       );
 
       // Use action creator to dispatch SET_FIELD_ERROR action
