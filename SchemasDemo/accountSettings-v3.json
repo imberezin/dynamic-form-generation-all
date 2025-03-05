@@ -1,5 +1,5 @@
 {
-  "title": "Account Settings",
+  "title": "Account Settings V-5",
   "fields": [
     {
       "name": "Email",
@@ -8,8 +8,8 @@
       "required": true
     },
     {
-      "name": "Password",
-      "label": "Password",
+      "name": "password",
+      "label": "New Password",
       "type": "password",
       "required": true,
       "minLength": 4

@@ -12,6 +12,7 @@ export function generateValidationSchema(fields) {
 
   fields.forEach((field) => {
     let validator;
+    console.log("field is :", field);
 
     // Create validator based on field type
     switch (field.type) {
@@ -33,6 +34,16 @@ export function generateValidationSchema(fields) {
       case "select":
         validator = Yup.string();
         break;
+      case "phone": // Add phone validation
+        validator = Yup.string().matches(
+          /^[+]?[(]?[0-9]{3}[)]?[-\s]?[0-9]{3}[-\s]?[0-9]{4,6}$/,
+          "Invalid phone number format"
+        );
+        break;
+      case "url": // Add URL validation
+        validator = Yup.string().url("Invalid URL format");
+        break;
+
       default:
         validator = Yup.string();
     }
@@ -53,6 +64,15 @@ export function generateValidationSchema(fields) {
     validationFields[field.name] = validator;
   });
 
+  // Add password confirmation validation
+  fields.forEach((field) => {
+    if (field.confirmPassword) {
+      // Update the validator with the password confirmation check
+      validationFields[field.name] = Yup.string()
+        .required("Confirm password is required")
+        .oneOf([Yup.ref(field.confirmPassword)], "Passwords must match");
+    }
+  });
   return Yup.object().shape(validationFields);
 }
 
@@ -77,9 +97,16 @@ export async function validateForm(schema, values) {
 /**
  * Validate a single field
  */
-export async function validateField(schema, name, value) {
+export async function validateField(schema, name, value, allValues) {
   try {
-    await schema.validateAt(name, { [name]: value });
+    // Create an object that includes the current field value
+    const valuesToValidate = {
+      ...allValues,
+      [name]: value, // Ensure the current value is used
+    };
+
+    // Validate using the combined values
+    await schema.validateAt(name, valuesToValidate);
     return { isValid: true, error: null };
   } catch (err) {
     return { isValid: false, error: err.message };
