@@ -1,15 +1,9 @@
 {
-  "title": "Job Application",
+  "title": "Job Application - v2",
   "fields": [
     {
       "name": "firstName",
-      "label": "First Name",
-      "type": "text",
-      "required": true
-    },
-    {
-      "name": "lastName",
-      "label": "Last Name",
+      "label": "Full Name",
       "type": "text",
       "required": true
     },
@@ -22,7 +16,7 @@
     {
       "name": "phone",
       "label": "Phone Number",
-      "type": "text",
+      "type": "phone",
       "required": true
     },
     {
@@ -51,6 +45,12 @@
       "label": "Available Start Date",
       "type": "date",
       "required": true
+    },
+    {
+      "name": "YourLinkedinUrl",
+      "label": "Your Linkedin Url",
+      "type": "url",
+      "required": false
     },
     {
       "name": "salary",

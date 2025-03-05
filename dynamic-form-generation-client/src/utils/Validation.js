@@ -27,6 +27,25 @@ export function generateValidationSchema(fields) {
         break;
       case "date":
         validator = Yup.date().typeError("Please enter a valid date");
+        if (field.minDate) {
+          validator = validator.min(
+            new Date(field.minDate),
+            `Date must be after ${field.minDate}`
+          );
+        }
+        if (field.maxDate || field.maxDateHint === "today") {
+          let maxDateValue = field.maxDate;
+
+          if (field.maxDateHint === "today") {
+            const today = new Date();
+            maxDateValue = today.toISOString().split("T")[0];
+          }
+
+          validator = validator.max(
+            new Date(maxDateValue),
+            `Date must be before ${maxDateValue}`
+          );
+        }
         break;
       case "number":
         validator = Yup.number().typeError("Must be a number");
@@ -58,6 +77,44 @@ export function generateValidationSchema(fields) {
         field.minLength,
         `Minimum ${field.minLength} characters required`
       );
+    }
+
+    if (field.maxLength) {
+      validator = validator.max(
+        field.maxLength,
+        `Maximum ${field.maxLength} characters allowed`
+      );
+    }
+
+    // Number specific validations
+    if (field.type === "number") {
+      if (field.min !== undefined) {
+        validator = validator.min(field.min, `Minimum value is ${field.min}`);
+      }
+      if (field.max !== undefined) {
+        validator = validator.max(field.max, `Maximum value is ${field.max}`);
+      }
+    }
+
+    if (field.customValidationFunctionString) {
+      try {
+        // This approach has security implications - only use with trusted inputs
+        const validationFn = new Function(
+          "value",
+          field.customValidationFunctionString
+        );
+        validator = validator.test(
+          `${field.name}-custom`,
+          field.customValidationMessage ||
+            `Invalid ${field.label || field.name}`,
+          validationFn
+        );
+      } catch (error) {
+        console.error(
+          `Error creating validation function for ${field.name}:`,
+          error
+        );
+      }
     }
 
     // Add to validation schema
