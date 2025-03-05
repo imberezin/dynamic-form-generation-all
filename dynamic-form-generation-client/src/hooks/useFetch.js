@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { schemaService, submissionService } from "../services/Api";
 /**
  * Enhanced useFetch hook that works with the API service
@@ -10,6 +10,8 @@ export default function useFetch(options) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [apiOptions, setApiOptions] = useState(options);
+
+  const hasRun = useRef(false);
 
   const handleSetError = useCallback((errorMessage) => {
     setError(() => errorMessage);
@@ -23,97 +25,116 @@ export default function useFetch(options) {
 
   // Fetch data based on service and endpoint
   useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
+    if (!hasRun.current) {
+      console.log("This will run only once");
+      hasRun.current = true;
 
-    async function fetchData() {
-      if (!apiOptions || !apiOptions.service || !apiOptions.endpoint) {
-        console.error("Invalid API options:", apiOptions);
-        return;
-      }
+      const controller = new AbortController();
+      const signal = controller.signal;
 
-      const { service, endpoint, params = {} } = apiOptions;
+      async function fetchData() {
+        if (!apiOptions || !apiOptions.service || !apiOptions.endpoint) {
+          console.error("Invalid API options:", apiOptions);
+          return;
+        }
 
-      setLoading(true);
-      setError(null);
+        const { service, endpoint, params = {} } = apiOptions;
 
-      try {
-        let data;
+        setLoading(true);
+        setError(null);
 
-        // Select the appropriate service and endpoint
-        switch (service) {
-          case "schema":
-            switch (endpoint) {
-              case "getActive":
-                data = await schemaService.getActiveSchema(params.timestamp);
-                break;
-              case "upload":
-                data = await schemaService.uploadSchema(params.schemaData);
-                break;
-              case "uploadFile":
-                data = await schemaService.uploadSchemaFile(params.formData);
-                break;
-              default:
-                throw new Error(`Unknown schema endpoint: ${endpoint}`);
-            }
-            break;
+        try {
+          let data;
 
-          case "submission":
-            switch (endpoint) {
-              case "getAll":
-                data = await submissionService.getSubmissions(params.timestamp);
-                break;
-              case "create":
-                data = await submissionService.createSubmission(
-                  params.formTitle,
-                  params.formData
-                );
-                break;
-              case "getOne":
-                data = await submissionService.getSubmission(params.id);
-                break;
-              default:
-                throw new Error(`Unknown submission endpoint: ${endpoint}`);
-            }
-            break;
-
-          default:
-            // Legacy API mode for backward compatibility
-            if (apiOptions.url) {
-              const response = await fetch(apiOptions.url, {
-                method: apiOptions.method !== "GET" ? apiOptions.method : "GET",
-                signal,
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                ...(apiOptions.method !== "GET" && { body: apiOptions.body }),
-              });
-
-              if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+          // Select the appropriate service and endpoint
+          switch (service) {
+            case "schema":
+              switch (endpoint) {
+                case "getActive":
+                  data = await schemaService.getActiveSchema(params.timestamp);
+                  hasRun.current = false;
+                  break;
+                case "upload":
+                  data = await schemaService.uploadSchema(params.schemaData);
+                  hasRun.current = false;
+                  break;
+                case "uploadFile":
+                  data = await schemaService.uploadSchemaFile(params.formData);
+                  hasRun.current = false;
+                  break;
+                default:
+                  throw new Error(`Unknown schema endpoint: ${endpoint}`);
               }
+              break;
 
-              data = await response.json();
-            } else {
-              throw new Error(`Unknown service: ${service}`);
-            }
-        }
+            case "submission":
+              switch (endpoint) {
+                case "getAll":
+                  data = await submissionService.getSubmissions(
+                    params.timestamp
+                  );
+                  hasRun.current = false;
+                  break;
+                case "create":
+                  data = await submissionService.createSubmission(
+                    params.formTitle,
+                    params.formData
+                  );
+                  hasRun.current = false;
+                  break;
+                case "getOne":
+                  data = await submissionService.getSubmission(params.id);
+                  hasRun.current = false;
+                  break;
+                default:
+                  throw new Error(`Unknown submission endpoint: ${endpoint}`);
+              }
+              break;
 
-        // console.log("Data fetched:", data);
-        setFormData(data);
-      } catch (err) {
-        console.error("Error fetching data:", err);
-        if (err.name !== "AbortError") {
-          setError(err.message || "An error occurred while fetching data.");
+            default:
+              // Legacy API mode for backward compatibility
+              if (apiOptions.url) {
+                const response = await fetch(apiOptions.url, {
+                  method:
+                    apiOptions.method !== "GET" ? apiOptions.method : "GET",
+                  signal,
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  ...(apiOptions.method !== "GET" && { body: apiOptions.body }),
+                });
+
+                if (!response.ok) {
+                  throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                data = await response.json();
+                hasRun.current = false;
+              } else {
+                throw new Error(`Unknown service: ${service}`);
+              }
+          }
+
+          // console.log("Data fetched:", data);
+          setFormData(data);
+        } catch (err) {
+          console.error("Error fetching data:", err);
+          if (err.name !== "AbortError") {
+            setError(err.message || "An error occurred while fetching data.");
+          }
+        } finally {
+          setLoading(false);
         }
-      } finally {
-        setLoading(false);
       }
+
+      fetchData();
+
+      //cleanup function
+      return () => {
+        //hasRun.current = false;
+        controller.abort();
+      };
     }
-
-    fetchData();
-
-    return () => controller.abort();
   }, [apiOptions]);
 
   return {
