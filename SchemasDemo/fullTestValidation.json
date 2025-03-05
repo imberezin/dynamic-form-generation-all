@@ -1,0 +1,74 @@
+{
+  "title": "Validation Test Schema - v2",
+  "fields": [
+    {
+      "name": "username",
+      "label": "Username",
+      "type": "text",
+      "required": true,
+      "minLength": 3,
+      "maxLength": 20
+    },
+    {
+      "name": "email",
+      "label": "Email",
+      "type": "email",
+      "required": true
+    },
+    {
+      "name": "password",
+      "label": "Password",
+      "type": "password",
+      "required": true,
+      "minLength": 8
+    },
+    {
+      "name": "confirmPassword",
+      "label": "Confirm Password",
+      "type": "password",
+      "required": true,
+      "confirmPassword": "password"
+    },
+    {
+      "name": "birthdate",
+      "label": "Birthdate",
+      "type": "date",
+      "required": true,
+      "minDate": "1924-01-01",
+      "maxDateHint": "today"
+    },
+    {
+      "name": "age",
+      "label": "Age",
+      "type": "number",
+      "required": true,
+      "min": 18,
+      "max": 100
+    },
+    {
+      "name": "gender",
+      "label": "Gender",
+      "type": "select",
+      "options": ["Male", "Female", "Other"],
+      "required": true
+    },
+    {
+      "name": "phone",
+      "label": "Phone Number",
+      "type": "phone",
+      "required": true
+    },
+    {
+      "name": "website",
+      "label": "Website",
+      "type": "url"
+    },
+    {
+      "name": "customField",
+      "type": "text",
+      "label": "Custom Field",
+      "customValidationFunctionString": "return value.startsWith('ABC')",
+      "customValidationMessage": "Value must start with ABC"
+    }
+  ]
+}
